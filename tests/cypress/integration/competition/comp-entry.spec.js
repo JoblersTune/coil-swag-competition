@@ -38,7 +38,7 @@ describe( 'Plugin Settings Panel', function() {
 			.click();
 	} );
 	it.only( 'check the winners tab exists', function() {
-		cy.visit( '/wp-admin/admin.php?page=coil_swag&tab=coil_winners' );
+		cy.visit( '/wp-admin/admin.php?page=coil_swag&tab=coil_contenders' );
 
 		cy.get( 'ol>li' ).each( ( $el ) => {
 			cy.wrap($el).then( ( $item ) => {
@@ -56,7 +56,7 @@ describe( 'Plugin Settings Panel', function() {
 						});
 				}).then(($result) => {
 					if ($result === true) {
-						cy.visit( '/wp-admin/admin.php?page=coil_swag&tab=coil_winners' );
+						cy.visit( '/wp-admin/admin.php?page=coil_swag&tab=coil_contenders' );
 						cy
 							.get( '#coil_contender_email' )
 							.type( `{selectall}${ email }` );

@@ -57,11 +57,11 @@ function register_admin_content_settings() {
 		'coil_swag_section'
 	);
 
-	// Tab 2 - Winners
+	// Tab 2 - Contenders
 	register_setting(
-		'coil_winners_settings_group',
-		'coil_winners_settings_group',
-		__NAMESPACE__ . '\coil_winners_settings_group_validation'
+		'coil_contenders_settings_group',
+		'coil_contenders_settings_group',
+		__NAMESPACE__ . '\coil_contenders_settings_group_validation'
 	);
 
 	// ==== Displays participants
@@ -78,6 +78,13 @@ function register_admin_content_settings() {
 		false,
 		__NAMESPACE__ . '\coil_contenders_settings_render_callback',
 		'coil_contenders_section'
+	);
+
+	// Tab 3 - Winners
+	register_setting(
+		'coil_winners_settings_group',
+		'coil_winners_settings_group',
+		false
 	);
 
 	// ==== Displays winners
@@ -124,16 +131,14 @@ function coil_swag_settings_group_validation( $swag_settings ): array {
  * @param array $winner_emails
  * @return array
 */
-function coil_winners_settings_group_validation( $winner_emails ): array {
-	$final_settings = get_option( 'coil_winners_settings_group', false ) ? get_option( 'coil_winners_settings_group' ) : [];
+function coil_contenders_settings_group_validation( $winner_emails ): array {
+	$final_settings = get_option( 'coil_contenders_settings_group', false ) ? get_option( 'coil_contenders_settings_group' ) : [];
 
 	if ( isset( $winner_emails['coil_entry_email'] ) ) {
 		$email     = sanitize_email( $winner_emails['coil_entry_email'] );
-		$new_entry = [
-			'coil_entry_email' => filter_var( $email, FILTER_VALIDATE_EMAIL ),
-		];
+		$new_entry = filter_var( $email, FILTER_VALIDATE_EMAIL );
 
-		if ( $new_entry['coil_entry_email'] ) {
+		if ( $new_entry ) {
 			array_push( $final_settings, $new_entry );
 		}
 	}
@@ -208,7 +213,7 @@ function coil_contenders_settings_render_callback() {
 	);
 
 	// Swag Entry Section
-	Rendering\render_text_input_field( 'coil_contender_email', 'coil_winners_settings_group[coil_entry_email]', '', 'example@mail.com', 'Email', 'Enter the email address associated with the submitted URL' );
+	Rendering\render_text_input_field( 'coil_contender_email', 'coil_contenders_settings_group[coil_entry_email]', '', 'example@mail.com', 'Email', 'Enter the email address associated with the submitted URL' );
 
 }
 
@@ -226,8 +231,8 @@ function coil_winners_settings_render_callback() {
 
 	if ( count( $winners ) > 0 ) {
 		echo( '<ol>' );
-		foreach ( $winners as $participant ) {
-			echo( '<li>' . $participant . '</li>' );
+		foreach ( $winners as $winner ) {
+			echo( '<li>' . $winner . '</li>' );
 		}
 		echo( '</ol>' );
 	}
@@ -245,6 +250,7 @@ function render_coil_swag_screen() : void {
 		<?php $active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'coil_competition'; ?>
 		<h2 class="nav-tab-wrapper">
 			<a href="<?php echo esc_url( '?page=coil_swag&tab=coil_competition' ); ?>" id="coil-swag-settings" class="nav-tab <?php echo $active_tab === 'coil-competition' ? esc_attr( 'nav-tab-active' ) : ''; ?>">Competition Entry</a>
+			<a href="<?php echo esc_url( '?page=coil_swag&tab=coil_contenders' ); ?>" id="coil-swag-winners" class="nav-tab <?php echo $active_tab === 'coil-contenders' ? esc_attr( 'nav-tab-active' ) : ''; ?>">Determine Valid Entries</a>
 			<a href="<?php echo esc_url( '?page=coil_swag&tab=coil_winners' ); ?>" id="coil-swag-winners" class="nav-tab <?php echo $active_tab === 'coil-winners' ? esc_attr( 'nav-tab-active' ) : ''; ?>">Announce Winners</a>
 		</h2>
 	</div>
@@ -260,12 +266,15 @@ function render_coil_swag_screen() : void {
 					do_settings_sections( 'coil_swag_section' );
 					submit_button();
 					break;
-				case 'coil_winners':
-					settings_fields( 'coil_winners_settings_group' );
+				case 'coil_contenders':
+					settings_fields( 'coil_contenders_settings_group' );
 					do_settings_sections( 'coil_participants_section' );
 					do_settings_sections( 'coil_contenders_section' );
 					submit_button();
-					//do_settings_sections( 'coil_winners_section' );
+					break;
+				case 'coil_winners':
+					settings_fields( 'coil_winners_settings_group' );
+					do_settings_sections( 'coil_winners_section' );
 					break;
 			}
 			?>
@@ -281,16 +290,16 @@ function render_coil_swag_screen() : void {
  * @param int
  * @return array
 */
-function get_winners( $max_winners ) {
-	$entries            = get_option( 'coil_swag_settings_group', [] );
+function get_winners( $max_winners ) : array {
+	$entries = get_option( 'coil_contenders_settings_group', false ) ? get_option( 'coil_contenders_settings_group', [] ) : [];
+	$winner_emails   = [];
 	$participant_emails = [];
-	$contender_emails   = [];
-	foreach ( $entries as $entry ) {
-		array_push( $participant_emails, $entry['coil_entry_email'] );
+
+	foreach( (array)$entries as $entry ) {
+		array_push( $participant_emails, $entry );
 	}
 
 	$participant_emails = array_unique( $participant_emails );
-
 	$num_valid_entries = count( $participant_emails );
 
 	if ( $num_valid_entries <= $max_winners ) {
@@ -303,9 +312,9 @@ function get_winners( $max_winners ) {
 		$index = wp_rand( 0, $num_valid_entries - 1 );
 		if ( ! in_array( $index, $winner_indices, true ) ) {
 			array_push( $winner_indices, $index );
-			array_push( $contender_emails, $participant_emails[ $index ] );
+			array_push( $winner_emails, $participant_emails[ $index ] );
 		}
 	}
 
-	return $contender_emails;
+	return $winner_emails;
 }

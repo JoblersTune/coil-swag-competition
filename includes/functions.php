@@ -36,10 +36,10 @@ function setup_database() {
 		add_option( 'coil_swag_settings_group' );
 	}
 
-	$coil_winners_settings_group = get_option( 'coil_winners_settings_group', 'absent' );
+	$coil_contenders_settings_group = get_option( 'coil_contenders_settings_group', 'absent' );
 
-	if ( $coil_winners_settings_group === 'absent' ) {
-		add_option( 'coil_winners_settings_group' );
+	if ( $coil_contenders_settings_group === 'absent' ) {
+		add_option( 'coil_contenders_settings_group' );
 	}
 }
 
