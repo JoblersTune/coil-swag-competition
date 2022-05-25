@@ -3,7 +3,7 @@
 /releases
 /node_modules/
 npm-debug.lo
-/vendor
+/vendor/
 /tests/cypress/screenshots
 /tests/cypress/videos
 /.idea

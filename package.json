@@ -1,0 +1,18 @@
+{
+	"title": "Coil Swag Competition for WordPress",
+	"name": "coil-swag-competition",
+	"version": "1.0.0",
+	"private": true,
+	"requires": "4.9",
+	"requires_php": "7.2",
+	"tested_up_to": "5.3",
+	"license": "Apache-2.0",
+	"description": "Plugin to determine if submitted links points to valid web monetized sites and select winners.",
+	"scripts": {
+		"cypress:open": "cypress open --project ./tests",
+		"cypress:run": "cypress run --project ./tests"
+	},
+	"devDependencies": {
+		"cypress": "^9.7.0"
+	}
+}
