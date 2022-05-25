@@ -21,6 +21,26 @@ function init_plugin() : void {
 	// Admin screens and settings.
 	add_action( 'admin_menu', __NAMESPACE__ . '\Settings\register_admin_menu' );
 	add_action( 'admin_init', __NAMESPACE__ . '\Settings\register_admin_content_settings' );
+	add_action( 'init', __NAMESPACE__ . '\setup_database' );
+}
+
+/**
+ * Ensures the database is in the correct state.
+ * 
+ * @return void
+ */
+function setup_database() {
+	$coil_swag_settings_group = get_option( 'coil_swag_settings_group', 'absent' );
+
+	if ( $coil_swag_settings_group === 'absent' ) {
+		add_option( 'coil_swag_settings_group' );
+	}
+
+	$coil_winners_settings_group = get_option( 'coil_winners_settings_group', 'absent' );
+
+	if ( $coil_winners_settings_group === 'absent' ) {
+		add_option( 'coil_winners_settings_group' );
+	}
 }
 
 /**

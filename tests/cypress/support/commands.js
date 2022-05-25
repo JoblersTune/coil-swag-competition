@@ -16,6 +16,7 @@
  * @param {string} password WordPress password.
  */
  Cypress.Commands.add( 'logInToWordPress', ( username, password ) => {
+	 cy.visit( 'http://wordcamp.local/wp-admin/about.php' );
 	cy.request( {
 		method: 'POST',
 		url: '/wp-login.php',
@@ -38,4 +39,21 @@
 
 		expect( authCookie ).to.include( 'wordpress_logged_in_' );
 	} );
+
+	// TODO add reset ability to clear winner's db option
+} );
+
+/**
+ * Add email to winners list.
+ */
+ Cypress.Commands.add( 'addToWinnerList', ( email ) => {
+	cy.visit( 'http://wordcamp.local/wp-admin/admin.php?page=coil_swag&tab=coil_winners' );
+
+	cy
+		.get( '#coil_contender_email' )
+		.type( `{selectall}${ email }` );
+
+	cy
+		.get( '#submit' )
+		.click();
 } );
