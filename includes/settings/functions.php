@@ -227,7 +227,7 @@ function coil_winners_settings_render_callback() {
 		'Coil Swag Winners'
 	);
 
-	$winners = get_winners( 2 );
+	$winners = get_winners( 3 );
 
 	if ( count( $winners ) > 0 ) {
 		echo( '<ol>' );
