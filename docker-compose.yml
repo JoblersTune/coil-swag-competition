@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.3"
 services:
     db:
         image: mysql:8
@@ -7,7 +7,7 @@ services:
     php:
         build:
             context: .
-            dockerfile: ./scripts/php.dockerfile
+            dockerfile: ./scripts/Dockerfile
         working_dir: /var/www/html
         # The bind mount allows videos and screenshots to be saved
         volumes:

@@ -6,7 +6,25 @@ RUN docker-php-ext-install mysqli
 
 RUN docker-php-ext-install pdo pdo_mysql
 
-COPY . .
+# Installing wp-cli
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod +x wp-cli.phar
+RUN mv wp-cli.phar /usr/local/bin/wp
+
+# Installing mysql-client
+RUN apt update
+RUN apt install default-mysql-client -y
+
+# Downloading WordPress core, which requires ZipArchive and copying in the plugin code
+RUN apt install -y libzip-dev zip && docker-php-ext-install zip
+RUN wp core download --allow-root
+
+# Installing Cypress dependencies and sudo
+RUN apt install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb sudo -y
+
+# Copying code into the correct folder
+RUN mkdir coil-swag-competition
+COPY ./scripts /var/www/html/wp-content/plugins/coil-swag-competition/scripts
 
 # Adjusting the wp-config.php, vars.php, and htaccess files appropriately for the context
 RUN cp wp-config-sample.php wp-config.php
@@ -14,7 +32,7 @@ RUN sed -i "s/database_name_here/wordpress/" "wp-config.php"
 RUN sed -i "s/username_here/admin/" "wp-config.php"
 RUN sed -i "s/password_here/password/" "wp-config.php"
 RUN sed -i "s/localhost/db/" "wp-config.php"
-RUN mv /var/www/html/wp-content/plugins/coil-swag-competition/scripts/vars.php /var/www/html/wp-includes/
+RUN mv /var/www/html/wp-content/plugins/coil-swag-competition/scripts/vars.php /var/www/html/wp-includes
 RUN mv /var/www/html/wp-content/plugins/coil-swag-competition/scripts/.htaccess /var/www/html/
 
 # Creating a node user
